@@ -61,11 +61,11 @@ class HashMap {
     size_t current_capacity_;
     Hash hash_maker_;
 
-    void InsertInternal(KeyValuePair element, int hashed_key);
+    void InsertInternal(KeyValuePair element, size_t hashed_key);
 
-    void Initialization(int capacity_ = 32);
+    void Initialization(size_t capacity_ = 32);
 
-    int MakeHash(const KeyType object) const;
+    size_t MakeHash(const KeyType object) const;
 
     void RehashIfNeeded();
 };
@@ -79,8 +79,7 @@ HashMap<KeyType, ValueType, Hash>::HashMap(Hash hash_obj)
 template<class KeyType, class ValueType, class Hash>
 template<typename ForwardIterator>
 HashMap<KeyType, ValueType, Hash>::HashMap(ForwardIterator start,
-        ForwardIterator end,
-        Hash hash_obj) : hash_maker_(hash_obj) {
+        ForwardIterator end, Hash hash_obj) : hash_maker_(hash_obj) {
     Initialization();
     for (; start != end; ++start) {
         insert(*start);
@@ -113,53 +112,49 @@ Hash HashMap<KeyType, ValueType, Hash>::hash_function() const {
 }
 
 template<class KeyType, class ValueType, class Hash>
-typename std::list<std::pair<const KeyType, ValueType>>::const_iterator
-HashMap<KeyType, ValueType, Hash>::begin() const {
+auto HashMap<KeyType, ValueType, Hash>::begin() const -> const_iterator {
     return const_iterator(data_.begin());
 }
 
 template<class KeyType, class ValueType, class Hash>
-typename std::list<std::pair<const KeyType, ValueType>>::const_iterator
-HashMap<KeyType, ValueType, Hash>::end() const {
+auto HashMap<KeyType, ValueType, Hash>::end() const -> const_iterator {
     return const_iterator(data_.end());
 }
 
 template<class KeyType, class ValueType, class Hash>
-typename std::list<std::pair<const KeyType, ValueType>>::iterator
-HashMap<KeyType, ValueType, Hash>::begin() {
+auto HashMap<KeyType, ValueType, Hash>::begin() -> iterator {
     return iterator(data_.begin());
 }
 
 template<class KeyType, class ValueType, class Hash>
-typename std::list<std::pair<const KeyType, ValueType>>::iterator
-HashMap<KeyType, ValueType, Hash>::end() {
+auto HashMap<KeyType, ValueType, Hash>::end() -> iterator {
     return iterator(data_.end());
 }
 
 template<class KeyType, class ValueType, class Hash>
 void HashMap<KeyType, ValueType, Hash>::insert(KeyValuePair element) {
-    size_t hashTableCellId = MakeHash(element.first);
-    if (!table_[hashTableCellId].empty()) {
-        auto it = table_[hashTableCellId].begin();
-        while (it != table_[hashTableCellId].end()) {
+    size_t hash_table_cell_id = MakeHash(element.first);
+    if (!table_[hash_table_cell_id].empty()) {
+        auto it = table_[hash_table_cell_id].begin();
+        while (it != table_[hash_table_cell_id].end()) {
             if ((*it)->first == element.first) {
                 return;
             }
             ++it;
         }
     }
-    InsertInternal(element, hashTableCellId);
+    InsertInternal(element, hash_table_cell_id);
     RehashIfNeeded();
 }
 
 template<class KeyType, class ValueType, class Hash>
 void HashMap<KeyType, ValueType, Hash>::erase(KeyType key) {
-    size_t hashTableCellId = MakeHash(key);
-    auto it = table_[hashTableCellId].begin();
-    for (; it != table_[hashTableCellId].end(); ++it) {
+    size_t hash_table_cell_id = MakeHash(key);
+    auto it = table_[hash_table_cell_id].begin();
+    for (; it != table_[hash_table_cell_id].end(); ++it) {
         if ((*it)->first == key) {
             data_.erase(*it);
-            table_[hashTableCellId].erase(it);
+            table_[hash_table_cell_id].erase(it);
             --current_size_;
             return;
         }
@@ -167,10 +162,10 @@ void HashMap<KeyType, ValueType, Hash>::erase(KeyType key) {
 }
 
 template<class KeyType, class ValueType, class Hash>
-typename std::list<std::pair<const KeyType, ValueType>>::const_iterator
-        HashMap<KeyType, ValueType, Hash>::find(const KeyType key) const {
-    size_t hashTableCellId = MakeHash(key);
-    for (auto&& element : table_[hashTableCellId]) {
+auto HashMap<KeyType, ValueType, Hash>::find(
+        const KeyType key) const -> const_iterator {
+    size_t hash_table_cell_id = MakeHash(key);
+    for (auto&& element : table_[hash_table_cell_id]) {
         if (element->first == key) {
             return const_iterator(element);
         }
@@ -180,10 +175,9 @@ typename std::list<std::pair<const KeyType, ValueType>>::const_iterator
 
 
 template<class KeyType, class ValueType, class Hash>
-typename std::list<std::pair<const KeyType, ValueType>>::iterator
-HashMap<KeyType, ValueType, Hash>::find(const KeyType key) {
-    size_t hashTableCellId = MakeHash(key);
-    for (auto&& element : table_[hashTableCellId]) {
+auto HashMap<KeyType, ValueType, Hash>::find(const KeyType key) -> iterator {
+    size_t hash_table_cell_id = MakeHash(key);
+    for (auto&& element : table_[hash_table_cell_id]) {
         if (element->first == key) {
             return iterator(element);
         }
@@ -200,8 +194,8 @@ ValueType& HashMap<KeyType, ValueType, Hash>::operator[] (const KeyType key) {
 }
 
 template<class KeyType, class ValueType, class Hash>
-const ValueType& HashMap<KeyType, ValueType,
-Hash>::at(const KeyType key) const {
+const ValueType& HashMap<KeyType, ValueType, Hash>
+        ::at(const KeyType key) const {
     auto it = find(key);
     if (it != end()) {
         return it->second;
@@ -210,8 +204,8 @@ Hash>::at(const KeyType key) const {
 }
 
 template<class KeyType, class ValueType, class Hash>
-HashMap<KeyType, ValueType, Hash>&
-        HashMap<KeyType, ValueType, Hash>::operator= (HashMap const &other) {
+HashMap<KeyType, ValueType, Hash>&HashMap<KeyType, ValueType, Hash>::operator= (
+        HashMap const &other) {
     if (this == &other) {
         return *this;
     }
@@ -227,8 +221,8 @@ HashMap<KeyType, ValueType, Hash>&
 template<class KeyType, class ValueType, class Hash>
 void HashMap<KeyType, ValueType, Hash>::clear() {
     for (auto&& element : data_) {
-        size_t hashTableCellId = MakeHash(element.first);
-        table_[hashTableCellId].clear();
+        size_t hash_table_cell_id = MakeHash(element.first);
+        table_[hash_table_cell_id].clear();
     }
     data_.clear();
     current_size_ = 0;
@@ -240,8 +234,8 @@ HashMap<KeyType, ValueType, Hash>::~HashMap() {
 }
 
 template<class KeyType, class ValueType, class Hash>
-void HashMap<KeyType, ValueType, Hash>::InsertInternal(std::pair<const KeyType,
-        ValueType> element, int hashed_key) {
+void HashMap<KeyType, ValueType, Hash>::InsertInternal(KeyValuePair element,
+        size_t hashed_key) {
     data_.emplace_back(element);
     auto current_iterator = data_.end();
     table_[hashed_key].emplace_back(--current_iterator);
@@ -249,14 +243,14 @@ void HashMap<KeyType, ValueType, Hash>::InsertInternal(std::pair<const KeyType,
 }
 
 template<class KeyType, class ValueType, class Hash>
-void HashMap<KeyType, ValueType, Hash>::Initialization(int capacity_) {
+void HashMap<KeyType, ValueType, Hash>::Initialization(size_t capacity_) {
     table_ = std::vector<std::list<iterator>> (capacity_);
     current_capacity_ = capacity_;
     current_size_ = 0;
 }
 
 template<class KeyType, class ValueType, class Hash>
-int HashMap<KeyType, ValueType, Hash>::MakeHash(const KeyType object) const {
+size_t HashMap<KeyType, ValueType, Hash>::MakeHash(const KeyType object) const {
     return hash_maker_(object) % current_capacity_;
 }
 
