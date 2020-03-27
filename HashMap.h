@@ -9,7 +9,7 @@
 
 template<class KeyType, class ValueType, class Hash = std::hash<KeyType>>
 class HashMap {
-public:
+ public:
     using KeyValuePair = std::pair<const KeyType, ValueType>;
     using const_iterator = typename std::list<KeyValuePair>::const_iterator;
     using iterator = typename std::list<KeyValuePair>::iterator;
@@ -54,7 +54,7 @@ public:
 
     ~HashMap();
 
-private:
+ private:
     std::vector<std::list<iterator>> table_;
     std::list<KeyValuePair> data_;
     size_t current_size_;
@@ -89,8 +89,8 @@ HashMap<KeyType, ValueType, Hash>::HashMap(
 }
 
 template<class KeyType, class ValueType, class Hash>
-HashMap<KeyType, ValueType, Hash>::HashMap
-        (std::initializer_list<KeyValuePair> init_list, Hash hash_obj)
+HashMap<KeyType, ValueType, Hash>::HashMap(
+        std::initializer_list<KeyValuePair> init_list, Hash hash_obj)
         : hash_maker_(hash_obj) {
     Initialization();
     for (auto&& element : init_list) {
